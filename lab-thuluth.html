@@ -1,0 +1,276 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>مختبر رمال المملكة</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@500;700;800&family=Tajawal:wght@400;500;700&display=swap">
+<style>
+/* Layout: one column of "lab stations" like cards on a worktable, a star tracker on top */
+:root{
+  --bg:#FBF6EC; --surface:#FFFFFF; --ink:#2B2A33; --muted:#6B6675;
+  --sand:#E8B964; --sand-deep:#C98F2E; --sky:#3C8DBC; --palm:#2E8B57; --wrong:#C8463D;
+  --line:#EADFC8; --paper:#FFFDF8;
+  --display:"Baloo Bhaijaan 2","Tajawal",system-ui,sans-serif;
+  --body:"Tajawal",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#1E1C24; --surface:#2A2731; --ink:#F4EEE2; --muted:#B5ADBF;
+  --sand:#E8B964; --sand-deep:#F0C77A; --sky:#6DB3DE; --palm:#5CC08A; --wrong:#F07A70;
+  --line:#3D3946; --paper:#34303C; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#1E1C24; --surface:#2A2731; --ink:#F4EEE2; --muted:#B5ADBF;
+  --sand:#E8B964; --sand-deep:#F0C77A; --sky:#6DB3DE; --palm:#5CC08A; --wrong:#F07A70;
+  --line:#3D3946; --paper:#34303C; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:18px;line-height:1.7;direction:rtl}
+.wrap{max-width:760px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px;display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{font-family:var(--display);line-height:1.3;text-wrap:balance;margin:0}
+h1{font-size:clamp(30px,7vw,44px);font-weight:800}
+h2{font-size:26px;font-weight:700}
+p{margin:0}
+.hero{display:flex;gap:16px;align-items:center}
+.hero .grain{flex:none;width:86px;height:86px}
+.hero .fact{font-size:20px;margin-top:4px}
+.fact b{color:var(--sand-deep)}
+.stars{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-family:var(--display);font-size:18px;color:var(--muted)}
+.star{width:34px;height:34px;transition:transform .4s}
+.star path{fill:var(--line);transition:fill .4s}
+.star.on path{fill:var(--sand)}
+.star.on{transform:rotate(-12deg) scale(1.1)}
+.station{background:var(--surface);border:2px solid var(--line);border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.tag{font-family:var(--display);font-size:15px;color:var(--sky);font-weight:700}
+.say{background:var(--paper);border-radius:16px;padding:10px 14px;display:flex;gap:10px;align-items:flex-start}
+.say svg{flex:none;width:40px;height:40px}
+button{font-family:var(--display);font-size:20px;font-weight:700;border:0;border-radius:14px;padding:10px 22px;cursor:pointer;background:var(--sky);color:#fff}
+button:focus-visible,.part:focus-visible,.shape:focus-visible,.cell:focus-visible{outline:3px solid var(--sky);outline-offset:3px}
+button.ghost{background:transparent;color:var(--sky);border:2px solid var(--sky)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+/* paper */
+.paper{display:flex;height:170px;border-radius:10px;overflow:hidden;background:var(--paper);border:2px solid var(--line);box-shadow:0 6px 0 var(--line)}
+.part{flex:1;display:grid;place-items:center;font-family:var(--display);font-size:22px;color:var(--muted);transition:background .35s;cursor:default;position:relative}
+.part + .part{border-inline-start:0 dashed var(--muted)}
+.folded .part + .part{border-inline-start-width:3px}
+.folded .part{cursor:pointer}
+.part.sand{background:var(--sand);color:#5a3d0c;background-image:radial-gradient(#c98f2e55 1.5px,transparent 1.6px);background-size:12px 12px}
+.paper.fold-anim{animation:squish .9s ease}
+@keyframes squish{0%{transform:scaleX(1)}40%{transform:scaleX(.36)}100%{transform:scaleX(1)}}
+.frac{display:inline-flex;flex-direction:column;align-items:center;font-family:var(--display);font-weight:800;line-height:1;vertical-align:middle;margin:0 4px}
+.frac span:first-child{border-bottom:3px solid currentColor;padding:0 6px 3px}
+.frac span:last-child{padding-top:3px}
+.big{font-size:44px;color:var(--sand-deep)}
+.msg{font-size:19px;min-height:1.7em}
+.msg.ok{color:var(--palm);font-weight:700}
+.msg.no{color:var(--wrong);font-weight:700}
+/* shapes */
+.shapes{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.shape{background:var(--paper);border:3px solid var(--line);border-radius:16px;padding:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:16px;color:var(--muted)}
+.shape svg{width:100%;max-width:140px;height:auto}
+.shape.picked{border-color:var(--sky)}
+.shape.right{border-color:var(--palm)}
+.shape.bad{border-color:var(--wrong)}
+.shape .note{min-height:1.5em;text-align:center;font-weight:700}
+.sv-sand{fill:var(--sand)} .sv-blank{fill:var(--surface)} .sv-line{stroke:var(--ink);stroke-width:3;fill:none}
+/* grid */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-width:330px;width:100%}
+.cell{aspect-ratio:1;max-width:100%;border-radius:10px;background:var(--paper);border:2px solid var(--line);cursor:pointer;transition:background .25s}
+.cell.sand{background:var(--sand);border-color:var(--sand-deep)}
+/* quiz */
+.q{display:flex;flex-direction:column;gap:8px}
+.q + .q{border-top:2px dashed var(--line);padding-top:14px}
+.opts{display:flex;gap:8px;flex-wrap:wrap}
+.opt{background:var(--paper);color:var(--ink);border:2px solid var(--line);font-size:19px;padding:8px 18px}
+.opt.right{border-color:var(--palm);background:var(--palm);color:#fff}
+.opt.bad{border-color:var(--wrong);color:var(--wrong)}
+.badge{display:flex;gap:14px;align-items:center;background:var(--sand);color:#3d2805;border-radius:22px;padding:18px}
+.badge svg{flex:none;width:70px;height:70px}
+details{background:var(--surface);border:2px dashed var(--line);border-radius:18px;padding:14px 18px;font-size:16px}
+summary{font-family:var(--display);font-size:19px;font-weight:700;cursor:pointer}
+details ul{margin:8px 0 0;padding-inline-start:20px}
+details li{margin-bottom:4px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="hero">
+    <svg class="grain" viewBox="0 0 100 100" aria-hidden="true">
+      <ellipse cx="50" cy="55" rx="40" ry="36" fill="var(--sand)"/>
+      <circle cx="30" cy="40" r="3" fill="var(--sand-deep)"/><circle cx="70" cy="72" r="3" fill="var(--sand-deep)"/><circle cx="62" cy="34" r="2.5" fill="var(--sand-deep)"/>
+      <circle cx="38" cy="54" r="5" fill="var(--ink)"/><circle cx="62" cy="54" r="5" fill="var(--ink)"/>
+      <path d="M40 68 q10 9 20 0" stroke="var(--ink)" stroke-width="4" fill="none" stroke-linecap="round"/>
+    </svg>
+    <div>
+      <h1>مختبر رمال المملكة</h1>
+      <p class="fact">تغطي المناطق الرملية نحو <b>ثلث</b> مساحة المملكة العربية السعودية. هيا نكتشف معًا: ما معنى «ثلث»؟</p>
+    </div>
+  </header>
+
+  <div class="stars" aria-live="polite">
+    <span>نجومكِ:</span>
+    <span id="stars"></span>
+  </div>
+
+  <!-- Station 1 -->
+  <section class="station" id="s1">
+    <span class="tag">المحطة الأولى</span>
+    <h2>اطوي ورقتكِ</h2>
+    <div class="say"><svg viewBox="0 0 100 100" aria-hidden="true"><ellipse cx="50" cy="55" rx="40" ry="36" fill="var(--sand)"/><circle cx="38" cy="52" r="5" fill="var(--ink)"/><circle cx="62" cy="52" r="5" fill="var(--ink)"/><path d="M40 66 q10 8 20 0" stroke="var(--ink)" stroke-width="4" fill="none" stroke-linecap="round"/></svg>
+      <p>أنا «رملة». تخيّلي أن هذه الورقة هي أرض المملكة. اطويها ثلاثة أجزاء <b>متساوية</b>، ثم لوّني جزءًا واحدًا بلون الرمل.</p></div>
+    <div class="paper" id="paper">
+      <div class="part" tabindex="-1" data-i="0"></div>
+      <div class="part" tabindex="-1" data-i="1"></div>
+      <div class="part" tabindex="-1" data-i="2"></div>
+    </div>
+    <div class="row">
+      <button id="foldBtn">اطوي الورقة</button>
+      <button class="ghost" id="resetPaper" hidden>من جديد</button>
+    </div>
+    <p class="msg" id="m1" aria-live="polite"></p>
+  </section>
+
+  <!-- Station 2 -->
+  <section class="station" id="s2">
+    <span class="tag">المحطة الثانية</span>
+    <h2>أين الثلث؟</h2>
+    <p>اختاري كل شكل لُوِّن فيه <b>ثلث</b> الشكل. تذكّري: الأجزاء لازم تكون متساوية!</p>
+    <div class="shapes" id="shapes"></div>
+    <div class="row"><button id="checkShapes">تحقّقي</button></div>
+    <p class="msg" id="m2" aria-live="polite"></p>
+  </section>
+
+  <!-- Station 3 -->
+  <section class="station" id="s3">
+    <span class="tag">المحطة الثالثة · تحدّي النجمة</span>
+    <h2>خريطة الرمال</h2>
+    <p>قسّمنا الأرض إلى <b>٩</b> مربعات متساوية. لوّني ثلثها بالرمل. كم مربعًا تحتاجين؟</p>
+    <div class="grid" id="grid"></div>
+    <p class="msg" id="m3" aria-live="polite">لوّنتِ ٠ من ٩</p>
+  </section>
+
+  <!-- Station 4 -->
+  <section class="station" id="s4">
+    <span class="tag">المحطة الرابعة</span>
+    <h2>سؤال رملة</h2>
+    <div id="quiz"></div>
+  </section>
+
+  <div class="badge" id="badge" hidden>
+    <svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="46" fill="#fff"/><path d="M50 14 l10 22 24 3 -18 16 5 24 -21 -12 -21 12 5 -24 -18 -16 24 -3z" fill="var(--sand-deep)"/></svg>
+    <div><h2>وسام مستكشفة الرمال</h2><p>أحسنتِ! عرفتِ أن الثلث جزء واحد من ثلاثة أجزاء متساوية، مثل رمال بلادنا الجميلة.</p></div>
+  </div>
+
+  <details>
+    <summary>للمعلمة: طريقة استخدام المختبر</summary>
+    <ul>
+      <li><b>الهدف:</b> أن تتعرّف الطالبة الكسر <span class="frac" style="font-size:15px"><span>١</span><span>٣</span></span> بوصفه جزءًا واحدًا من ثلاثة أجزاء متساوية، وتربطه بمساحة الرمال في المملكة.</li>
+      <li><b>الزمن:</b> ١٥–٢٠ دقيقة.</li>
+      <li><b>الأدوات:</b> ورقة A4 وألوان لكل طالبة، وشاشة أو جهاز لكل مجموعة.</li>
+      <li><b>التنفيذ:</b> تطوي الطالبات الورقة الحقيقية في نفس وقت المحطة الأولى على الشاشة، ثم تعمل كل مجموعة على المحطات بالترتيب.</li>
+      <li><b>التقويم:</b> المحطة الثانية تكشف خطأ «الأجزاء غير المتساوية»، والمحطة الرابعة تقويم ختامي سريع. المحطة الثالثة إثرائية للمتفوقات.</li>
+      <li><b>الإغلاق:</b> اسألي: «لو قسمنا أرض المملكة ثلاثة أجزاء متساوية، كم جزءًا منها تقريبًا رمال؟»</li>
+    </ul>
+  </details>
+</div>
+
+<script>
+const AR = n => String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
+const frac = (a,b,cls='') => `<span class="frac ${cls}"><span>${AR(a)}</span><span>${AR(b)}</span></span>`;
+
+/* stars */
+const earned = new Set();
+const starSVG = on => `<svg class="star ${on?'on':''}" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7L12 17.6 5.8 21.1l1.4-7L2 9.3l7-.8z"/></svg>`;
+function drawStars(){
+  document.getElementById('stars').innerHTML=[0,1,2,3].map(i=>starSVG(earned.has(i))).join('')+` <span>${AR(earned.size)} من ٤</span>`;
+  document.getElementById('badge').hidden = earned.size<4;
+}
+function earn(i){ if(!earned.has(i)){earned.add(i);drawStars(); if(earned.size===4) document.getElementById('badge').scrollIntoView({behavior:'smooth',block:'center'});} }
+drawStars();
+
+/* station 1 */
+const paper=document.getElementById('paper'), parts=[...paper.children], m1=document.getElementById('m1');
+const foldBtn=document.getElementById('foldBtn'), resetBtn=document.getElementById('resetPaper');
+foldBtn.onclick=()=>{
+  paper.classList.add('fold-anim');
+  setTimeout(()=>{
+    paper.classList.add('folded');
+    parts.forEach(p=>{p.tabIndex=0;p.setAttribute('role','button');p.setAttribute('aria-label','جزء من الورقة');});
+    m1.className='msg'; m1.textContent='صارت الورقة ٣ أجزاء متساوية. اضغطي على جزء واحد لتلوينه بالرمل.';
+    foldBtn.hidden=true; resetBtn.hidden=false;
+  },500);
+};
+function updatePaper(){
+  const n=parts.filter(p=>p.classList.contains('sand')).length;
+  if(n===0){m1.className='msg';m1.textContent='اضغطي على جزء واحد لتلوينه.';return;}
+  if(n===1){m1.className='msg ok';m1.innerHTML=`رائع! لوّنتِ جزءًا واحدًا من ٣ أجزاء متساوية. هذا هو الثلث ${frac(1,3,'big')} &nbsp;وهكذا تقريبًا رمال المملكة من مساحتها.`;earn(0);}
+  else{m1.className='msg no';m1.innerHTML=`لوّنتِ ${AR(n)} أجزاء، يعني ${frac(n,3)}. المطلوب جزء واحد فقط، اضغطي على جزء لإلغاء تلوينه.`;}
+}
+parts.forEach(p=>{
+  const t=()=>{ if(!paper.classList.contains('folded'))return; p.classList.toggle('sand'); updatePaper(); };
+  p.onclick=t; p.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();t();}};
+});
+resetBtn.onclick=()=>{parts.forEach(p=>{p.classList.remove('sand');p.tabIndex=-1;});paper.classList.remove('folded','fold-anim');foldBtn.hidden=false;resetBtn.hidden=true;m1.textContent='';};
+
+/* station 2 */
+const shapes=[
+  {ok:true, why:'٣ أجزاء متساوية، واحد ملوّن', svg:`<rect class="sv-blank" x="5" y="20" width="130" height="60"/><rect class="sv-sand" x="91.7" y="20" width="43.3" height="60"/><rect class="sv-line" x="5" y="20" width="130" height="60"/><path class="sv-line" d="M48.3 20v60M91.7 20v60"/>`},
+  {ok:false, why:'الأجزاء غير متساوية', svg:`<rect class="sv-blank" x="5" y="20" width="130" height="60"/><rect class="sv-sand" x="85" y="20" width="50" height="60"/><rect class="sv-line" x="5" y="20" width="130" height="60"/><path class="sv-line" d="M25 20v60M85 20v60"/>`},
+  {ok:true, why:'٣ أجزاء متساوية، واحد ملوّن', svg:`<circle class="sv-blank" cx="70" cy="50" r="42"/><path class="sv-sand" d="M70 50 L70 8 A42 42 0 0 1 106.4 71 Z"/><circle class="sv-line" cx="70" cy="50" r="42"/><path class="sv-line" d="M70 50V8M70 50L106.4 71M70 50L33.6 71"/>`},
+  {ok:false, why:'هذا ربع: ٤ أجزاء', svg:`<rect class="sv-blank" x="5" y="20" width="130" height="60"/><rect class="sv-sand" x="102.5" y="20" width="32.5" height="60"/><rect class="sv-line" x="5" y="20" width="130" height="60"/><path class="sv-line" d="M37.5 20v60M70 20v60M102.5 20v60"/>`},
+];
+const shWrap=document.getElementById('shapes'), m2=document.getElementById('m2');
+shapes.forEach((s,i)=>{
+  const b=document.createElement('div');b.className='shape';b.tabIndex=0;b.setAttribute('role','checkbox');b.setAttribute('aria-checked','false');b.setAttribute('aria-label','الشكل '+AR(i+1));
+  b.innerHTML=`<svg viewBox="0 0 140 100" aria-hidden="true">${s.svg}</svg><span class="note"></span>`;
+  const t=()=>{b.classList.toggle('picked');b.classList.remove('right','bad');b.querySelector('.note').textContent='';b.setAttribute('aria-checked',b.classList.contains('picked'));};
+  b.onclick=t;b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();t();}};
+  shWrap.appendChild(b);
+});
+document.getElementById('checkShapes').onclick=()=>{
+  let allOk=true;
+  [...shWrap.children].forEach((b,i)=>{
+    const picked=b.classList.contains('picked'), s=shapes[i];
+    b.classList.remove('right','bad');
+    if(picked===s.ok){ if(picked){b.classList.add('right');b.querySelector('.note').textContent='✓ '+s.why;} else b.querySelector('.note').textContent=''; }
+    else{allOk=false;b.classList.add('bad');b.querySelector('.note').textContent=s.why;}
+  });
+  if(allOk){m2.className='msg ok';m2.textContent='ممتاز! الثلث يكون فقط إذا كانت الأجزاء الثلاثة متساوية.';earn(1);}
+  else{m2.className='msg no';m2.textContent='قرّبتِ! انظري إلى الأشكال ذات الإطار الأحمر وجرّبي مرة ثانية.';}
+};
+
+/* station 3 */
+const grid=document.getElementById('grid'), m3=document.getElementById('m3');
+for(let i=0;i<9;i++){
+  const c=document.createElement('div');c.className='cell';c.tabIndex=0;c.setAttribute('role','button');c.setAttribute('aria-label','مربع '+AR(i+1));
+  const t=()=>{c.classList.toggle('sand');upd3();};
+  c.onclick=t;c.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();t();}};
+  grid.appendChild(c);
+}
+function upd3(){
+  const n=grid.querySelectorAll('.sand').length;
+  if(n===3){m3.className='msg ok';m3.innerHTML=`صح! ٩ مربعات = ٣ صفوف، وكل صف ٣ مربعات. لوّنتِ صفًّا واحدًا من ٣، يعني الثلث ${frac(1,3)}.`;earn(2);}
+  else if(n>3){m3.className='msg no';m3.textContent=`لوّنتِ ${AR(n)} من ٩. هذا أكثر من الثلث. فكّري: كم صفًّا في الخريطة؟`;}
+  else{m3.className='msg';m3.textContent=`لوّنتِ ${AR(n)} من ٩`;}
+}
+
+/* station 4 */
+const qs=[
+  {q:'تغطي الرمال نحو ...... مساحة المملكة.', o:['نصف','ثلث','ربع'], a:1},
+  {q:'طوينا الورقة ٣ أجزاء متساوية ولوّنّا جزءًا واحدًا. ما الكسر؟', o:[frac(2,3),frac(1,3),frac(3,1)], a:1},
+  {q:`في الكسر ${frac(1,3)} ماذا يعني الرقم ٣ في الأسفل؟`, o:['عدد الأجزاء الملوّنة','عدد كل الأجزاء المتساوية'], a:1},
+];
+const quiz=document.getElementById('quiz'), solved=new Set();
+qs.forEach((q,qi)=>{
+  const d=document.createElement('div');d.className='q';
+  d.innerHTML=`<p><b>${AR(qi+1)}.</b> ${q.q}</p><div class="opts"></div><p class="msg" aria-live="polite"></p>`;
+  const opts=d.querySelector('.opts'), msg=d.querySelector('.msg');
+  q.o.forEach((o,oi)=>{
+    const b=document.createElement('button');b.className='opt';b.innerHTML=o;
+    b.onclick=()=>{
+      if(solved.has(qi))return;
+      if(oi===q.a){b.classList.add('right');msg.className='msg ok';msg.textContent='أحسنتِ!';solved.add(qi);if(solved.size===qs.length)earn(3);}
+      else{b.classList.add('bad');msg.className='msg no';msg.textContent='حاولي مرة ثانية.';}
+    };
+    opts.appendChild(b);
+  });
+  quiz.appendChild(d);
+});
+</script>
+
+</body></html>

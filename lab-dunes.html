@@ -1,0 +1,402 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>مصنع الكثبان</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@500;700;800&family=Tajawal:wght@400;500;700&display=swap">
+<style>
+/* Layout: one column of numbered "stations" (a real sequence), each a lab card around a live canvas */
+:root{
+  --bg:#eaf4f8; --surface:#ffffff; --ink:#1f2a44; --muted:#5b6782;
+  --sand:#e3b768; --sand-deep:#c08a3e; --sand-hi:#f3d59a;
+  --sky-top:#9fd3ec; --sky-bot:#eaf6fb;
+  --accent:#e0663a; --accent-ink:#ffffff; --good:#2f9d68; --bad:#c9483b;
+  --line:#d3e1ea; --chip:#f1f7fa;
+  --display:"Baloo Bhaijaan 2","Tajawal",system-ui,sans-serif;
+  --body:"Tajawal","Segoe UI",Tahoma,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141a2e; --surface:#1d2540; --ink:#f1ece0; --muted:#a6afc8;
+  --sand:#d9a95a; --sand-deep:#a9762f; --sand-hi:#ecc98a;
+  --sky-top:#1b2550; --sky-bot:#3b3f6b;
+  --accent:#f08457; --accent-ink:#1a1206; --good:#55c48e; --bad:#ec7366;
+  --line:#2e3858; --chip:#252e4d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a2e; --surface:#1d2540; --ink:#f1ece0; --muted:#a6afc8;
+  --sand:#d9a95a; --sand-deep:#a9762f; --sand-hi:#ecc98a;
+  --sky-top:#1b2550; --sky-bot:#3b3f6b;
+  --accent:#f08457; --accent-ink:#1a1206; --good:#55c48e; --bad:#ec7366;
+  --line:#2e3858; --chip:#252e4d; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:18px;line-height:1.7;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 48px}
+main{max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+h1,h2{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.25}
+h1{font-size:clamp(34px,7vw,52px);font-weight:800}
+h2{font-size:clamp(22px,4.4vw,28px);font-weight:700}
+p{margin:0}
+header{display:flex;flex-direction:column;gap:6px;padding-block:8px}
+header .sub{color:var(--muted);font-size:19px}
+.stars{display:flex;gap:6px;align-items:center;font-family:var(--display);font-size:17px;color:var(--muted)}
+.star{width:26px;height:26px;display:inline-block}
+.star path{fill:var(--line);transition:fill .4s}
+.star.on path{fill:#f2b632}
+section.st{background:var(--surface);border:2px solid var(--line);border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.st-head{display:flex;gap:12px;align-items:center}
+.num{flex:none;width:42px;height:42px;border-radius:50%;background:var(--sand);color:#3b2a0e;font-family:var(--display);font-weight:800;font-size:22px;display:grid;place-items:center}
+.lead{color:var(--muted)}
+.box-wrap{position:relative;border-radius:16px;overflow:hidden;background:linear-gradient(var(--sky-bot),var(--chip))}
+canvas{display:block;width:100%;max-width:100%}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+button{font-family:var(--display);font-weight:700;font-size:19px;border:none;border-radius:14px;padding:10px 18px;cursor:pointer;color:var(--ink);background:var(--chip);border:2px solid var(--line);touch-action:manipulation}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+button.blow{font-size:22px;padding:14px 26px;user-select:none;-webkit-user-select:none}
+button.blow.active{transform:scale(.96);filter:brightness(1.1)}
+.opt{flex:1 1 180px;text-align:center}
+.opt.right{background:color-mix(in srgb,var(--good) 18%,var(--surface));border-color:var(--good)}
+.opt.wrong{background:color-mix(in srgb,var(--bad) 14%,var(--surface));border-color:var(--bad)}
+.feedback{min-height:1.7em;font-weight:700}
+.feedback.good{color:var(--good)} .feedback.bad{color:var(--bad)}
+.meter{flex:1 1 200px;height:16px;border-radius:99px;background:var(--chip);border:2px solid var(--line);overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:var(--sand-deep);transition:width .2s}
+.clock{font-family:var(--display);font-variant-numeric:tabular-nums;font-size:18px;min-width:9ch}
+.chat{display:flex;flex-direction:column;gap:8px}
+.bubble{max-width:85%;padding:8px 14px;border-radius:16px;background:var(--chip);border:2px solid var(--line)}
+.bubble.t{align-self:flex-start} .bubble.s{align-self:flex-end;background:color-mix(in srgb,var(--sand) 25%,var(--surface))}
+.bubble b{font-family:var(--display)}
+.locked{opacity:.45;pointer-events:none}
+input[type=range]{width:100%;accent-color:var(--accent);height:34px}
+.ticks{display:flex;justify-content:space-between;font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums;gap:4px}
+.ticks span{text-align:center;flex:1}
+.ticks span.cur{color:var(--accent);font-weight:700}
+.era{font-family:var(--display);font-size:22px;text-align:center}
+.eq{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;font-family:var(--display);font-size:22px}
+.slot{min-width:130px;min-height:54px;border:3px dashed var(--line);border-radius:14px;display:grid;place-items:center;padding:4px 10px}
+.slot.filled{border-style:solid;border-color:var(--sand-deep);background:color-mix(in srgb,var(--sand) 25%,var(--surface))}
+.tiles{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.card-concept{display:none;text-align:center;font-family:var(--display);font-size:clamp(22px,5vw,30px);padding:16px;border-radius:16px;background:var(--sand);color:#3b2a0e}
+.card-concept.show{display:block;animation:pop .5s}
+@keyframes pop{0%{transform:scale(.8)}70%{transform:scale(1.05)}100%{transform:scale(1)}}
+.gens{display:grid;grid-template-columns:repeat(auto-fill,minmax(9px,1fr));gap:3px;padding:10px;border-radius:14px;background:var(--chip);max-height:300px;overflow:auto}
+.gens span{aspect-ratio:1;border-radius:50%;background:var(--line);transition:background .2s}
+.gens span.on{background:var(--sand-deep)}
+.gens span.me{background:var(--accent)!important}
+.gens span.fam{background:#5a8fd8!important}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:15px;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-inline-end:6px;vertical-align:middle}
+.big{font-family:var(--display);font-size:clamp(26px,6vw,36px);font-variant-numeric:tabular-nums;text-align:center}
+.badge{text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center}
+.medal{width:150px;height:150px}
+details{background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:14px 18px}
+summary{font-family:var(--display);font-weight:700;cursor:pointer;font-size:19px}
+details ul{margin:10px 0 0;padding-inline-start:20px;display:flex;flex-direction:column;gap:6px;font-size:16px}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<main dir="rtl" lang="ar">
+  <header>
+    <h1>مصنع الكثبان</h1>
+    <p class="sub">كيف يصنع الهواء جبالًا من الرمل؟ هيا نجرّب بأنفسنا!</p>
+    <div class="stars" aria-label="النجوم التي جمعتِها">
+      <span>نجومك:</span>
+      <span id="stars"></span>
+    </div>
+  </header>
+
+  <!-- 1 -->
+  <section class="st" id="s1">
+    <div class="st-head"><span class="num">١</span><h2>توقّعي قبل أن نبدأ</h2></div>
+    <p class="lead">هذا صندوق شفاف فيه رمل ناعم مستوٍ، وبجانبه مروحة صغيرة. لو شغّلنا المروحة، ماذا سيحدث للرمل؟</p>
+    <div class="row" id="predict">
+      <button class="opt" data-v="flat">يبقى مستويًا كما هو</button>
+      <button class="opt" data-v="gone">يطير ويختفي كله</button>
+      <button class="opt" data-v="pile">يتجمّع في أماكن</button>
+    </div>
+    <p class="feedback" id="predictFb"></p>
+  </section>
+
+  <!-- 2 -->
+  <section class="st" id="s2">
+    <div class="st-head"><span class="num">٢</span><h2>شغّلي المروحة!</h2></div>
+    <p class="lead">اضغطي على زر <b>انفخي</b> واستمري بالضغط، وراقبي الرمل جيدًا. نريد أن ننفخ دقيقة كاملة.</p>
+    <div class="box-wrap"><canvas id="box" height="300" aria-label="صندوق الرمل والمروحة"></canvas></div>
+    <div class="row">
+      <button class="primary blow" id="blowBtn">🌬️ انفخي</button>
+      <div class="meter" aria-hidden="true"><i id="meter"></i></div>
+      <span class="clock" id="clock">٠ ثانية</span>
+      <button id="resetBtn">سوّي الرمل</button>
+    </div>
+    <p style="font-size:14px;color:var(--muted)">ساعة المختبر مُسرّعة، حتى لا تتعب يدك.</p>
+    <div id="observe" class="locked" style="display:flex;flex-direction:column;gap:10px">
+      <div class="chat">
+        <div class="bubble t"><b>المعلمة:</b> ماذا حدث للرمل؟</div>
+      </div>
+      <div class="row" id="obsOpts">
+        <button class="opt" data-v="gone">اختفى الرمل</button>
+        <button class="opt" data-v="pile">تجمّع في مكان واحد</button>
+        <button class="opt" data-v="flat">بقي مستويًا</button>
+      </div>
+      <p class="feedback" id="obsFb"></p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="st" id="s3">
+    <div class="st-head"><span class="num">٣</span><h2>آلة الزمن</h2></div>
+    <div class="chat">
+      <div class="bubble t"><b>المعلمة:</b> نحن نفخنا دقيقة واحدة فقط. تخيّلن الرياح تنفخ أكثر من ١٧ ألف سنة… ماذا سيحدث؟</div>
+    </div>
+    <p class="lead">حرّكي المؤشر وشاهدي الرمل يكبر. انظري إلى البنت الصغيرة بجانبه!</p>
+    <div class="box-wrap"><canvas id="desert" height="260" aria-label="صحراء تكبر فيها الكثبان مع الزمن"></canvas></div>
+    <p class="era" id="era">بعد دقيقة واحدة</p>
+    <input type="range" id="time" min="0" max="500" value="0" step="1" aria-label="كم سنة تنفخ الرياح">
+    <div class="ticks" id="ticks"></div>
+    <div class="chat" id="mountains" hidden>
+      <div class="bubble s"><b>طالبة:</b> جبال من الرمل!</div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="st" id="s4">
+    <div class="st-head"><span class="num">٤</span><h2>ركّبي بطاقة المفهوم</h2></div>
+    <p class="lead">ما الذي صنع الجبال الرملية؟ اضغطي على البطاقات بالترتيب لتملئي الفراغات. انتبهي، فيها بطاقة زائدة!</p>
+    <div class="eq">
+      <span class="slot" data-i="0"></span><span>+</span>
+      <span class="slot" data-i="1"></span><span>=</span>
+      <span class="slot" data-i="2"></span>
+    </div>
+    <div class="tiles" id="tiles"></div>
+    <div class="row" style="justify-content:center"><button id="eqReset">امسحي وحاولي من جديد</button></div>
+    <p class="feedback" id="eqFb" style="text-align:center"></p>
+    <div class="card-concept" id="concept">الرياح + الزمن الطويل = رمال عظيمة</div>
+  </section>
+
+  <!-- 5 -->
+  <section class="st" id="s5">
+    <div class="st-head"><span class="num">٥</span><h2>كم هي ١٧ ألف سنة؟</h2></div>
+    <p class="lead">كل نقطة هنا تمثّل جيلًا واحدًا من العائلة، وكل جيل حوالي ٢٥ سنة. أول نقطة هي أنتِ، ثم أمك، ثم جدتك، ثم جدة جدتك… اضغطي لنرجع في الزمن!</p>
+    <div class="legend">
+      <span><i style="background:var(--accent)"></i>أنتِ</span>
+      <span><i style="background:#5a8fd8"></i>أمك وجدتك وجدة جدتك</span>
+      <span><i style="background:var(--sand-deep)"></i>أجداد أقدم وأقدم…</span>
+    </div>
+    <div class="row"><button class="primary" id="genBtn">ارجعي في الزمن ⏪</button></div>
+    <p class="big" id="genCount">٠ جيل · ٠ سنة</p>
+    <div class="gens" id="gens" aria-hidden="true"></div>
+    <p class="feedback good" id="genFb"></p>
+  </section>
+
+  <!-- badge -->
+  <section class="st badge" id="s6">
+    <svg class="medal" viewBox="0 0 150 150" aria-hidden="true">
+      <circle cx="75" cy="75" r="68" fill="var(--sand)"/>
+      <circle cx="75" cy="75" r="56" fill="none" stroke="var(--sand-deep)" stroke-width="5" stroke-dasharray="6 6"/>
+      <path d="M22 100 C45 70 60 62 80 78 C95 90 110 70 128 100 Z" fill="var(--sand-deep)"/>
+      <path d="M40 52 q12 -8 24 0 q12 8 24 0" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+      <path d="M52 66 q10 -6 20 0 q10 6 20 0" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".8"/>
+    </svg>
+    <h2 id="badgeTitle">اجمعي النجوم الخمس لتفوزي بالوسام</h2>
+    <p class="lead" id="badgeText">كل محطة تعطيك نجمة.</p>
+  </section>
+
+  <details>
+    <summary>دليل المعلمة</summary>
+    <ul>
+      <li>اعرضي الصفحة على السبورة الذكية، ولتأتِ طالبة مختلفة إلى كل محطة.</li>
+      <li>في المحطة الأولى: لتكتب كل طالبة توقعها على ورقة قبل الضغط، ثم تقارن بعد التجربة.</li>
+      <li>نفّذي التجربة الحقيقية بالصندوق والمروحة أو الماصة أولًا، ثم استخدمي الصفحة لتكبير الصورة عبر الزمن.</li>
+      <li>سؤال ختامي للنقاش: لو توقفت الرياح، هل يكبر الكثيب؟ ولو نفخت الرياح يومًا واحدًا فقط؟</li>
+    </ul>
+  </details>
+</main>
+
+<script>
+(function(){
+const AR='٠١٢٣٤٥٦٧٨٩';
+const ar=n=>String(n).replace(/\d/g,d=>AR[d]);
+const css=()=>{const s=getComputedStyle(document.documentElement);const g=k=>s.getPropertyValue(k).trim();
+  return {sand:g('--sand'),deep:g('--sand-deep'),hi:g('--sand-hi'),ink:g('--ink'),muted:g('--muted'),line:g('--line'),skyT:g('--sky-top'),skyB:g('--sky-bot'),accent:g('--accent'),surface:g('--surface')}};
+let C=css();
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- stars ---------- */
+const earned=new Set();
+const starsEl=document.getElementById('stars');
+const starSvg='<svg class="star" viewBox="0 0 24 24"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17l-6.1 3.4 1.5-6.8L2.2 9l6.9-.7z"/></svg>';
+starsEl.innerHTML=starSvg.repeat(5);
+function earn(k){ if(earned.has(k))return; earned.add(k);
+  [...starsEl.children].forEach((s,i)=>s.classList.toggle('on',i<earned.size));
+  if(earned.size===5){document.getElementById('badgeTitle').textContent='وسام مهندسة الكثبان الصغيرة 🏅';
+    document.getElementById('badgeText').textContent='أحسنتِ! عرفتِ أن الرياح مع الزمن الطويل تصنع رمالًا عظيمة.';}
+  else document.getElementById('badgeText').textContent='معك '+ar(earned.size)+' من ٥ نجوم. استمري!';
+}
+
+/* ---------- 1: prediction ---------- */
+let prediction=null;
+document.querySelectorAll('#predict .opt').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#predict .opt').forEach(x=>x.classList.remove('right'));
+  b.classList.add('right'); prediction=b.dataset.v;
+  document.getElementById('predictFb').textContent='سجّلنا توقعك! الآن جرّبي في المحطة الثانية وتأكدي.';
+  document.getElementById('predictFb').className='feedback good'; earn('predict');
+});
+
+/* ---------- 2: sand box simulation ---------- */
+const box=document.getElementById('box'), bx=box.getContext('2d');
+const N=150, ROWS=70; const h=new Int16Array(N);
+let parts=[];
+function initSand(){ for(let i=0;i<N;i++) h[i]=9+(Math.random()<.35?1:0); parts=[]; }
+initSand();
+function relax(k){ const q=[k]; let g=0;
+  while(q.length&&g++<800){ const c=q.pop();
+    for(const n of [c-1,c+1]){ if(n<0||n>=N)continue;
+      if(h[c]-h[n]>2){h[c]--;h[n]++;q.push(c,n);} else if(h[n]-h[c]>2){h[n]--;h[c]++;q.push(c,n);} } } }
+function sheltered(i){ for(let k=1;k<=5;k++){const u=i+k; if(u>=N)break; if(h[u]-h[i]>k*0.7+0.6)return true;} return false; }
+function step(){ const i=1+Math.floor(Math.random()*(N-1)); if(h[i]<=0||sheltered(i))return;
+  h[i]--; relax(i); let j=i; const L=4;
+  while(true){ j-=L; if(j<=0){j=0;break;} if(h[j]>=ROWS-3)continue; if(Math.random()<(h[j]>0?0.6:0.4))break; }
+  if(h[j]>=ROWS-3){h[i]++;return;}
+  h[j]++; relax(j);
+  if(parts.length<220 && Math.random()<.7) parts.push({x0:i,x1:j,t:0,sp:.03+Math.random()*.03,hy:4+Math.random()*10});
+}
+let BW=0,BH=0;
+function sizeCanvas(c,hgt){ const r=c.getBoundingClientRect(); const dpr=Math.min(2,window.devicePixelRatio||1);
+  c.width=Math.round(r.width*dpr); c.height=Math.round(hgt*dpr); c.style.height=hgt+'px'; c.getContext('2d').setTransform(dpr,0,0,dpr,0,0); return r.width; }
+let fanAngle=0;
+function drawBox(){
+  const W=BW,H=BH; bx.clearRect(0,0,W,H);
+  const pad=14, fanW=Math.min(80,W*.16), left=pad, right=W-fanW-pad, top=40, bottom=H-pad;
+  const cw=(right-left)/N, gh=(bottom-top)/ROWS;
+  // sand
+  bx.beginPath(); bx.moveTo(left,bottom);
+  for(let i=0;i<N;i++){ const y=bottom-h[i]*gh; bx.lineTo(left+i*cw,y); bx.lineTo(left+(i+1)*cw,y); }
+  bx.lineTo(right,bottom); bx.closePath();
+  const gr=bx.createLinearGradient(0,top,0,bottom); gr.addColorStop(0,C.hi); gr.addColorStop(1,C.deep);
+  bx.fillStyle=gr; bx.fill();
+  // grains speckle
+  bx.fillStyle=C.deep; bx.globalAlpha=.35;
+  for(let i=0;i<N;i+=2){ const y0=bottom-h[i]*gh; for(let y=y0+4;y<bottom;y+=9){ bx.fillRect(left+i*cw+((i*7+y)%5),y,1.6,1.6);} }
+  bx.globalAlpha=1;
+  // flying grains
+  bx.fillStyle=C.deep;
+  parts=parts.filter(p=>{ p.t+=p.sp*(reduce?3:1); if(p.t>=1)return false;
+    const x=left+(p.x0+(p.x1-p.x0)*p.t)*cw; const base=bottom-Math.max(h[p.x0],h[p.x1])*gh;
+    const y=base-Math.sin(Math.PI*p.t)*p.hy*1.5; bx.fillRect(x,y,2.4,2.4); return true; });
+  // box walls (transparent plastic)
+  bx.strokeStyle=C.muted; bx.lineWidth=3; bx.globalAlpha=.6;
+  bx.beginPath(); bx.moveTo(left,top-10); bx.lineTo(left,bottom); bx.lineTo(right,bottom); bx.lineTo(right,top-10); bx.stroke();
+  bx.globalAlpha=1;
+  // fan
+  const fx=W-fanW/2-pad/2, fy=bottom-(bottom-top)*.35, r=fanW*.38;
+  bx.strokeStyle=C.ink; bx.lineWidth=4; bx.beginPath(); bx.moveTo(fx,fy); bx.lineTo(fx,bottom); bx.stroke();
+  bx.beginPath(); bx.arc(fx,fy,r+4,0,Math.PI*2); bx.stroke();
+  bx.fillStyle=C.accent;
+  for(let k=0;k<3;k++){ const a=fanAngle+k*2.094; bx.beginPath(); bx.ellipse(fx+Math.cos(a)*r*.5,fy+Math.sin(a)*r*.5,r*.5,r*.2,a,0,Math.PI*2); bx.fill(); }
+  bx.fillStyle=C.ink; bx.beginPath(); bx.arc(fx,fy,4,0,Math.PI*2); bx.fill();
+  // wind lines
+  if(blowing){ bx.strokeStyle=C.muted; bx.lineWidth=2; bx.globalAlpha=.5;
+    for(let k=0;k<4;k++){ const off=((performance.now()/6)+k*90)%(right-left); const y=top+8+k*12;
+      bx.beginPath(); bx.moveTo(right-off,y); bx.lineTo(right-off-36,y); bx.stroke(); }
+    bx.globalAlpha=1; }
+  // label
+  bx.fillStyle=C.muted; bx.font='15px Tajawal, sans-serif'; bx.textAlign='center';
+  bx.fillText('الرياح ←',(left+right)/2+40,22);
+}
+let blowing=false, blowSec=0, observeOpen=false, last=performance.now();
+const blowBtn=document.getElementById('blowBtn');
+const start=e=>{e.preventDefault(); blowing=true; blowBtn.classList.add('active');};
+const stop=()=>{blowing=false; blowBtn.classList.remove('active');};
+blowBtn.addEventListener('pointerdown',start); addEventListener('pointerup',stop); blowBtn.addEventListener('pointerleave',stop); blowBtn.addEventListener('pointercancel',stop);
+blowBtn.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){start(e);}}); blowBtn.addEventListener('keyup',stop);
+blowBtn.addEventListener('contextmenu',e=>e.preventDefault());
+document.getElementById('resetBtn').onclick=()=>{initSand(); blowSec=0; updClock();};
+function updClock(){ const s=Math.min(60,Math.floor(blowSec)); document.getElementById('clock').textContent=s>=60?'دقيقة كاملة ✔':ar(s)+' ثانية';
+  document.getElementById('meter').style.width=(Math.min(60,blowSec)/60*100)+'%';
+  if(blowSec>=60&&!observeOpen){observeOpen=true; document.getElementById('observe').classList.remove('locked'); earn('blow');} }
+document.querySelectorAll('#obsOpts .opt').forEach(b=>b.onclick=()=>{
+  const fb=document.getElementById('obsFb'); document.querySelectorAll('#obsOpts .opt').forEach(x=>x.classList.remove('right','wrong'));
+  if(b.dataset.v==='pile'){ b.classList.add('right');
+    fb.textContent='صحيح! الرياح حملت حبات الرمل وجمعتها في تلال صغيرة.'+(prediction==='pile'?' وتوقّعكِ كان صحيحًا من البداية!':'');
+    fb.className='feedback good'; earn('observe'); }
+  else { b.classList.add('wrong'); fb.textContent='انظري إلى الصندوق مرة أخرى… أين ذهب الرمل؟'; fb.className='feedback bad'; }
+});
+
+/* ---------- 3: time machine ---------- */
+const desert=document.getElementById('desert'), dx=desert.getContext('2d');
+const stops=[{l:'دقيقة',e:'بعد دقيقة واحدة: تلّ صغير جدًا مثل تجربتنا',g:.03},
+  {l:'يوم',e:'بعد يوم: تلّ صغير',g:.07},{l:'سنة',e:'بعد سنة: تلّ أكبر',g:.16},
+  {l:'١٠٠ سنة',e:'بعد ١٠٠ سنة: صار أطول من البنت بكثير',g:.34},
+  {l:'١٠٠٠ سنة',e:'بعد ١٠٠٠ سنة: كثبان ضخمة',g:.62},
+  {l:'١٧ ألف سنة',e:'بعد أكثر من ١٧ ألف سنة: جبال من الرمل!',g:1}];
+const ticks=document.getElementById('ticks'); ticks.innerHTML=stops.map(s=>'<span>'+s.l+'</span>').join('');
+const tr=document.getElementById('time'); let gNow=stops[0].g, gTarget=gNow, DW=0, DH=260;
+function onTime(){ const v=+tr.value/100; const i=Math.floor(v), f=v-i; const a=stops[Math.min(i,5)], b=stops[Math.min(i+1,5)];
+  gTarget=a.g+(b.g-a.g)*f; const near=Math.round(v);
+  document.getElementById('era').textContent=stops[near].e;
+  [...ticks.children].forEach((s,k)=>s.classList.toggle('cur',k===near));
+  if(near===5){document.getElementById('mountains').hidden=false; earn('time');} }
+tr.addEventListener('input',onTime); onTime();
+const dunes=[{c:.58,w:.42,m:1},{c:.22,w:.22,m:.5},{c:.9,w:.16,m:.38}];
+function duneY(x,g,ground,maxH){ let best=0;
+  for(const d of dunes){ const t=(x-d.c)/d.w; let s=0;
+    if(t>=0) s=Math.pow(Math.max(0,1-t),1.5); else s=Math.pow(Math.max(0,1+t*2.4),1.1);
+    best=Math.max(best,s*d.m);} return ground-best*g*maxH; }
+function drawDesert(){
+  gNow+= (gTarget-gNow)*(reduce?1:.12);
+  const W=DW,H=DH; dx.clearRect(0,0,W,H);
+  const sky=dx.createLinearGradient(0,0,0,H); sky.addColorStop(0,C.skyT); sky.addColorStop(1,C.skyB); dx.fillStyle=sky; dx.fillRect(0,0,W,H);
+  dx.fillStyle='#f6c34a'; dx.globalAlpha=.9; dx.beginPath(); dx.arc(W*.12,48,22,0,Math.PI*2); dx.fill(); dx.globalAlpha=1;
+  const ground=H-28, maxH=H-60;
+  dx.beginPath(); dx.moveTo(0,H);
+  for(let x=0;x<=W;x+=3){ dx.lineTo(x,duneY(x/W,gNow,ground,maxH)); }
+  dx.lineTo(W,H); dx.closePath();
+  const sg=dx.createLinearGradient(0,ground-maxH*gNow,0,H); sg.addColorStop(0,C.hi); sg.addColorStop(1,C.deep);
+  dx.fillStyle=sg; dx.fill();
+  dx.fillStyle=C.deep; dx.fillRect(0,ground,W,H-ground);
+  // girl for scale
+  const px=W*.06, py=ground; dx.fillStyle=C.ink;
+  dx.beginPath(); dx.arc(px,py-30,5,0,Math.PI*2); dx.fill();
+  dx.beginPath(); dx.moveTo(px-7,py); dx.lineTo(px,py-25); dx.lineTo(px+7,py); dx.closePath(); dx.fill();
+  dx.font='13px Tajawal, sans-serif'; dx.textAlign='center'; dx.fillStyle=C.surface; dx.fillText('أنا',px,py+18);
+  // wind arrow
+  dx.strokeStyle=C.ink; dx.globalAlpha=.4; dx.lineWidth=2;
+  dx.beginPath(); dx.moveTo(W-20,30); dx.lineTo(W-80,30); dx.lineTo(W-72,24); dx.moveTo(W-80,30); dx.lineTo(W-72,36); dx.stroke(); dx.globalAlpha=1;
+}
+
+/* ---------- 4: concept equation ---------- */
+const words=['الزمن الطويل','رمال عظيمة','الماء','الرياح'];
+const tilesEl=document.getElementById('tiles'); const slots=[...document.querySelectorAll('.slot')]; let filled=[];
+function renderTiles(){ tilesEl.innerHTML=''; words.forEach(w=>{ if(filled.includes(w))return; const b=document.createElement('button'); b.textContent=w;
+  b.onclick=()=>place(w); tilesEl.appendChild(b); }); slots.forEach((s,i)=>{s.textContent=filled[i]||''; s.classList.toggle('filled',!!filled[i]);}); }
+function place(w){ if(filled.length>=3)return; filled.push(w); renderTiles(); const fb=document.getElementById('eqFb');
+  if(filled.length===3){ const ok=filled[2]==='رمال عظيمة' && filled.slice(0,2).sort().join()==['الرياح','الزمن الطويل'].sort().join();
+    if(ok){fb.textContent='رائع! هذه هي القاعدة.'; fb.className='feedback good'; document.getElementById('concept').classList.add('show'); earn('eq');}
+    else if(filled.includes('الماء')){fb.textContent='هل استخدمنا الماء في تجربتنا؟ فكّري مرة أخرى.'; fb.className='feedback bad';}
+    else {fb.textContent='قريب! ما الذي نحصل عليه في النهاية؟ ضعيه بعد علامة =.'; fb.className='feedback bad';} } }
+document.getElementById('eqReset').onclick=()=>{filled=[]; renderTiles(); document.getElementById('eqFb').textContent='';};
+renderTiles();
+
+/* ---------- 5: generations ---------- */
+const GENS=680, gens=document.getElementById('gens');
+gens.innerHTML='<span></span>'.repeat(GENS); const dots=[...gens.children];
+let gi=0, running=false;
+document.getElementById('genBtn').onclick=()=>{ if(running)return; running=true; gi=0; dots.forEach(d=>d.className='');
+  const per=reduce?GENS:6;
+  (function tick(){ for(let k=0;k<per&&gi<GENS;k++,gi++){ dots[gi].className=gi===0?'on me':gi<4?'on fam':'on'; }
+    document.getElementById('genCount').textContent=ar(gi)+' جيل · '+ar(gi*25)+' سنة';
+    if(gi<GENS) requestAnimationFrame(tick);
+    else { running=false; document.getElementById('genFb').textContent='٦٨٠ جيلًا تقريبًا! جدة جدة جدة… جدتك، مئات المرات. والرمل كان هنا قبلهم جميعًا.'; earn('gens'); } })(); };
+
+/* ---------- loop ---------- */
+function resize(){ BW=sizeCanvas(box,Math.max(220,Math.min(320,box.parentElement.clientWidth*.5))); BH=parseFloat(box.style.height);
+  DW=sizeCanvas(desert,DH); }
+addEventListener('resize',resize); resize();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{C=css();});
+new MutationObserver(()=>{C=css();}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+function frame(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
+  if(blowing){ for(let k=0;k<7;k++)step(); blowSec+=dt*4; fanAngle+=dt*18; updClock(); }
+  drawBox(); drawDesert(); requestAnimationFrame(frame); }
+requestAnimationFrame(frame);
+})();
+</script>
+
+</body></html>
